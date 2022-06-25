@@ -1,2 +1,9 @@
 ﻿  main.cpp
+  UdpClient.cpp
+  UdpCommunication.cpp
+  UdpServer.cpp
+  UdpSocket.cpp
+D:\sources\UdpServer\UdpServer\UdpSocket.cpp(27,1): warning C4297: UdpSocket::~UdpSocket: ожидается, что функция не будет выдавать исключения, но она это делает
+D:\sources\UdpServer\UdpServer\UdpSocket.cpp(27,1): message : деструктор или метод отмены выделения имеет (возможно, неявно) спецификацию, не предусматривающую создание исключений
+  Создание кода...
   UdpServer.vcxproj -> D:\sources\UdpServer\x64\Debug\UdpServer.exe

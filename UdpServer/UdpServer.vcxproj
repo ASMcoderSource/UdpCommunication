@@ -142,9 +142,15 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="UdpClient.cpp" />
+    <ClCompile Include="UdpCommunication.cpp" />
+    <ClCompile Include="UdpServer.cpp" />
     <ClCompile Include="UdpSocket.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="UdpClient.h" />
+    <ClInclude Include="UdpCommunication.h" />
+    <ClInclude Include="UdpServer.h" />
     <ClInclude Include="UdpSocket.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

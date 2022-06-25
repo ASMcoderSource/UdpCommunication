@@ -9,10 +9,13 @@
 #include <winsock.h>
 #include <windows.h>
 
+
+#define SOCKET_TERMINATED 1
+
 struct Datagram {
 	void* data_ptr;
 	int32_t data_size;
-	sockaddr addr;
+	SOCKADDR_IN addr;
 	int addr_size;
 };
 
@@ -33,6 +36,7 @@ class UdpSocket {
 	bool ready = false;
 	bool connected = false;
 	bool listening = false;
+	bool socket_owner = true;
 
 public:
 	UdpSocket();
@@ -44,11 +48,18 @@ public:
 	// make connection method
 	void makeConnection(std::string server_ip, int port);
 
+	// receive datagram from buffer
 	Datagram receiveNextDatagram();
+
+	// send datagram 
 	int sendDatagram(Datagram& datagram);
 	int sendDatagram(Datagram& datagram, std::string destination);
 	int sendDatagram(void* data_ptr, int32_t data_size, std::string destination = "");
+	
+	// prepere object to be destructed
+	void prepareToDelete();
 
+	UdpSocket& operator = (UdpSocket& socket);
 protected:
 	// prepare SOCKADDR_IN values
 	virtual SOCKADDR_IN createSocketAddr(std::string ip, int port);

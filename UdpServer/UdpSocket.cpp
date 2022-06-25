@@ -21,6 +21,8 @@ UdpSocket::UdpSocket() {
 }
 
 UdpSocket::~UdpSocket() {
+	if (socket_owner == false)
+		return;
 	if (listening)
 		throw std::exception("Socket error: Destruction active listening socket");
 }
@@ -98,28 +100,43 @@ void UdpSocket::bindSocket() {
 		throw std::exception("Socket error: Binding is not succesful");
 }
 
+void UdpSocket::prepareToDelete() {
+	ready = false;
+	listening = false;
+	connected = false;
+	if( socket_owner )
+		::closesocket(socket);
+}
+
 // RECEIVE DATAGRAM ------------------------------------------------------------------------------------
 
 Datagram UdpSocket::receiveNextDatagram() {
 	// verify object ready to receive datagrams
+	if (ready == false)
+		throw SOCKET_TERMINATED;
 	if (!(listening || connected))
 		throw std::exception("Socket error: Can't receive datagram without listening or connecting");
 
 	// create and prepare receive datagrams
 	Datagram receive_datagram{0};
-	sockaddr addr;
+	SOCKADDR addr;
 	int addr_len = sizeof(sockaddr);
 	int size = 0;
 
 	// execute reading datagram, and check for errors
 	size = recvfrom(socket, buffer.get(), buffer_size, 0, &addr, &addr_len);
-	if (size == SOCKET_ERROR) 
+	if (ready == false)
+		throw SOCKET_TERMINATED;
+	if (size == SOCKET_ERROR ) 
 		throw std::exception("Socket error: Receiving error");
 
 	receive_datagram.addr_size = addr_len;
-	receive_datagram.addr = addr;
+	receive_datagram.addr = *reinterpret_cast<SOCKADDR_IN*>(&addr);
 	receive_datagram.data_ptr = buffer.get();
 	receive_datagram.data_size = size;
+
+	if (listening)
+		other_addr = receive_datagram.addr;
 	return receive_datagram;
 }
 
@@ -152,4 +169,19 @@ int UdpSocket::sendDatagram(void* data_ptr, int32_t data_size, std::string desti
 	}
 
 	return len;
+}
+
+UdpSocket& UdpSocket::operator = (UdpSocket& socket) {
+	memcpy(this, &socket, sizeof(UdpSocket));
+	socket_owner = false;
+	buffer.release();
+
+	// create buffer in heap
+	try {
+		buffer = std::make_unique<char>(buffer_size);
+	}
+	catch (...) {
+		throw std::exception("Socket error: Memory allocation error");
+	}
+	return *this;
 }
